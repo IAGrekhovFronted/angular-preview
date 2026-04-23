@@ -1,0 +1,24 @@
+.import-file-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.import-file-wrapper__choose-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.import-file-wrapper__file-link {
+  width: 50%;
+}
+
+.import-file-wrapper__main {
+  height: 100%;
+}
+
+.import-file-wrapper__choose-file__label {
+  font-weight: 700;
+}

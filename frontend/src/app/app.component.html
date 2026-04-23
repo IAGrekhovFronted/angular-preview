@@ -1,20 +1,12 @@
-<div class="app">
-  <header class="app__header">
-    <h1 class="app__title">PDF preview</h1>
-    <label class="app__file">
-      <span>Открыть PDF:</span>
-      <input type="file" accept="application/pdf" (change)="onFileSelected($event)" />
-    </label>
-    <input
-      type="text"
-      class="app__url"
-      placeholder="или введите URL"
-      [value]="urlInput"
-      (change)="onUrlChanged($any($event.target).value)"
-    />
+<div class="app-wrapper">
+  <header>
+    <h1>Preview TEST</h1>
   </header>
+  <nav class="app-wrapper_nav">
+    <a routerLink="/pdf-preview" routerLinkActive="active">PDF Preview</a>
+  </nav>
 
-  <main class="app__body">
-    <app-pdf-preview [src]="pdfSource"></app-pdf-preview>
+  <main class="app-wrapper__main">
+    <router-outlet></router-outlet>
   </main>
 </div>
