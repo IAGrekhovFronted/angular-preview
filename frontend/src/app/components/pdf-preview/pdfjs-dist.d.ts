@@ -1,6 +1,3 @@
-// Minimal ambient declarations for pdfjs-dist 2.x, which ships without types.
-// Only surfaces the API actually used by the PDF preview component.
-
 declare module "pdfjs-dist/build/pdf" {
   export interface GlobalWorkerOptionsType {
     workerSrc: string;
