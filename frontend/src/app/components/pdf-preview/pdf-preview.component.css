@@ -96,8 +96,6 @@
   z-index: 1;
 }
 
-/* Text layer — overlays canvas with transparent, selectable text spans.
-   Mirrors pdfjs-dist/web/pdf_viewer.css required by renderTextLayer output. */
 .pdf-page .textLayer {
   position: absolute;
   left: 0;

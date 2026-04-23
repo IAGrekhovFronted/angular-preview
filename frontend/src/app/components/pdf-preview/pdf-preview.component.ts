@@ -36,6 +36,10 @@ export class PdfPreviewComponent implements OnChanges, OnDestroy {
   error: string | null = null;
   totalPages = 0;
 
+  get scalePercent(): number {
+    return Math.round(this.scale * 100);
+  }
+
   private pdfDoc: any = null;
   private renderTasks: any[] = [];
   private destroyed = false;
@@ -127,7 +131,11 @@ export class PdfPreviewComponent implements OnChanges, OnDestroy {
       if (this.destroyed || token !== this.loadToken) {
         return;
       }
-      this.error = (err && err.message) || "Не удалось загрузить PDF";
+      const message =
+        err && typeof (err as { message?: unknown }).message === "string"
+          ? (err as { message: string }).message
+          : "";
+      this.error = message || "Не удалось загрузить PDF";
     } finally {
       if (!this.destroyed && token === this.loadToken) {
         this.loading = false;
@@ -181,10 +189,11 @@ export class PdfPreviewComponent implements OnChanges, OnDestroy {
       try {
         await this.renderPage(i, token);
       } catch (err) {
+        const e = err as { name?: string; message?: string } | null;
         if (
-          err &&
-          (err.name === "RenderingCancelledException" ||
-            err.message === "Rendering cancelled")
+          e &&
+          (e.name === "RenderingCancelledException" ||
+            e.message === "Rendering cancelled")
         ) {
           return;
         }
