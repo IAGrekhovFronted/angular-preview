@@ -1,0 +1,25 @@
+<div class="docx-preview">
+  <div class="docx-preview__status" *ngIf="loading">Загрузка документа…</div>
+  <div
+    class="docx-preview__status docx-preview__status--error"
+    *ngIf="error"
+  >
+    {{ error }}
+  </div>
+  <div
+    class="docx-preview__warnings"
+    *ngIf="warnings.length && !loading && !error"
+  >
+    <div class="docx-preview__warnings-title">
+      Предупреждения при конвертации:
+    </div>
+    <ul class="docx-preview__warnings-list">
+      <li *ngFor="let w of warnings">{{ w }}</li>
+    </ul>
+  </div>
+  <div
+    class="docx-preview__content"
+    *ngIf="html && !loading && !error"
+    [innerHTML]="html"
+  ></div>
+</div>

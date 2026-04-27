@@ -5,7 +5,7 @@ import {
   Output,
 } from "@angular/core";
 
-export type PdfSource = string | Uint8Array | null;
+export type FileSource = string | Uint8Array | null;
 
 @Component({
   selector: "import-file",
@@ -14,7 +14,7 @@ export type PdfSource = string | Uint8Array | null;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImportFileComponent {
-  @Output() sourceChange = new EventEmitter<PdfSource>();
+  @Output() sourceChange = new EventEmitter<FileSource>();
   @Output() urlChange = new EventEmitter<string>();
 
   urlInput = "";
