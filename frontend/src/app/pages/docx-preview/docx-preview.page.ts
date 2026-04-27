@@ -1,24 +1,24 @@
 import {
-  Component,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  Component,
 } from "@angular/core";
 import { FileSource } from "../../components/import-file/import-file.component";
 
 @Component({
-  selector: "pdf-preview-page",
-  templateUrl: "./pdf-preview.page.html",
-  styleUrls: ["./pdf-preview.page.css"],
+  selector: "docx-preview-page",
+  templateUrl: "./docx-preview.page.html",
+  styleUrls: ["./docx-preview.page.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PdfPreviewPage {
-  pdfSource: FileSource = null;
+export class DocxPreviewPage {
+  docxSource: FileSource = null;
   urlInput = "";
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   onSourceChange(source: FileSource): void {
-    this.pdfSource = source;
+    this.docxSource = source;
     this.cdr.markForCheck();
   }
 

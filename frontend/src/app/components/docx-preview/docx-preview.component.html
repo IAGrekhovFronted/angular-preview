@@ -1,0 +1,38 @@
+<div class="docx-preview">
+  <div class="docx-preview__toolbar">
+    <button
+      type="button"
+      class="docx-preview__btn"
+      [class.docx-preview__btn--active]="breakPages"
+      (click)="toggleBreakPages()"
+      [disabled]="loading"
+      title="Постраничный режим"
+    >
+      Страницы
+    </button>
+    <button
+      type="button"
+      class="docx-preview__btn"
+      [class.docx-preview__btn--active]="renderHeaders"
+      (click)="toggleHeaders()"
+      [disabled]="loading"
+      title="Колонтитулы"
+    >
+      Колонтитулы
+    </button>
+  </div>
+
+  <div class="docx-preview__viewport">
+    <div class="docx-preview__status" *ngIf="loading">
+      Загрузка документа…
+    </div>
+    <div
+      class="docx-preview__status docx-preview__status--error"
+      *ngIf="error"
+    >
+      {{ error }}
+    </div>
+    <div #styleContainer class="docx-preview__styles"></div>
+    <div #bodyContainer class="docx-preview__body"></div>
+  </div>
+</div>
