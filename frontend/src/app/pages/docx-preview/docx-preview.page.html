@@ -6,5 +6,7 @@
     (sourceChange)="onSourceChange($event)"
     (urlChange)="onUrlInputChange($event)"
   ></import-file>
-  <div class="docx-preview-page-wrapper__preview"></div>
+  <div class="docx-preview-page-wrapper__preview">
+    <app-docx-preview [src]="docxSource"></app-docx-preview>
+  </div>
 </div>

@@ -13,13 +13,13 @@ import { FileSource } from "src/app/components/pdf-preview/pdfjs-setup";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocxPreviewPage {
-  pdfSource: FileSource = null;
+  docxSource: FileSource = null;
   urlInput = "";
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   onSourceChange(source: PdfSource): void {
-    this.pdfSource = source;
+    this.docxSource = source;
     this.cdr.markForCheck();
   }
 
