@@ -10,7 +10,7 @@ import {
   isCancelledError,
   normalizeSource,
   pdfjsLib,
-  PdfSource,
+  FileSource,
 } from "./pdfjs-setup";
 
 @Injectable()
@@ -41,7 +41,7 @@ export class PdfRendererService implements OnDestroy {
     this.container = el;
   }
 
-  async load(src: PdfSource, scale: number): Promise<void> {
+  async load(src: FileSource, scale: number): Promise<void> {
     this.currentScale = scale;
     const token = ++this.loadToken;
     this.cancelRenderTasks();

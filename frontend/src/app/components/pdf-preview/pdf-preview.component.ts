@@ -14,7 +14,7 @@ import {
 import { Subscription } from "rxjs";
 
 import { PdfRendererService } from "./pdf-renderer.service";
-import { PdfSource } from "./pdfjs-setup";
+import { FileSource } from "./pdfjs-setup";
 
 @Component({
   selector: "app-pdf-preview",
@@ -25,7 +25,7 @@ import { PdfSource } from "./pdfjs-setup";
   providers: [PdfRendererService],
 })
 export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() src: PdfSource;
+  @Input() src: FileSource;
   @Input() scale = 1.25;
 
   @ViewChild("pagesContainer", { static: true })
