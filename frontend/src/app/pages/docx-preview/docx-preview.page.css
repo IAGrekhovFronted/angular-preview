@@ -1,0 +1,17 @@
+.docx-preview-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  height: 100%;
+  margin-top: 100px;
+}
+
+.docx-preview-page-wrapper__preview {
+  overflow: auto;
+  max-height: 1000px;
+}
+
+.docx-preview-page-wrapper__info {
+  font-size: 20px;
+}
