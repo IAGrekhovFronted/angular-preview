@@ -1,0 +1,14 @@
+<div class="doc-preview-page-wrapper">
+  <div class="doc-preview-page-wrapper__info">
+    Компонент, реализованный через библиотеку mammothjs <br />
+    Необходимо учесть важность реализации санитайзера, для предотвращения
+    XSS-атак при отображении контента из внешних источников. <br />
+  </div>
+  <import-file
+    (sourceChange)="onSourceChange($event)"
+    (urlChange)="onUrlInputChange($event)"
+  ></import-file>
+  <div class="doc-preview-page-wrapper__preview">
+    <app-docx-preview [source]="docxSource"></app-docx-preview>
+  </div>
+</div>
