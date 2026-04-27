@@ -1,0 +1,13 @@
+<div class="import-file-wrapper">
+  <label class="import-file-wrapper__choose-file">
+    <span class="import-file-wrapper__choose-file__label">Открыть файл:</span>
+    <input type="file" (change)="onFileSelected($event)" />
+  </label>
+  <input
+    type="text"
+    class="import-file-wrapper__file-link"
+    placeholder="или введите URL"
+    [value]="urlInput"
+    (change)="onUrlChanged($any($event.target).value)"
+  />
+</div>

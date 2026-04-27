@@ -1,0 +1,34 @@
+<div class="pdf-preview">
+  <div class="pdf-preview__toolbar">
+    <button
+      type="button"
+      class="pdf-preview__btn"
+      (click)="zoomOut()"
+      [disabled]="loading || !totalPages"
+      title="Уменьшить"
+    >
+      −
+    </button>
+    <span class="pdf-preview__zoom">{{ scalePercent }}%</span>
+    <button
+      type="button"
+      class="pdf-preview__btn"
+      (click)="zoomIn()"
+      [disabled]="loading || !totalPages"
+      title="Увеличить"
+    >
+      +
+    </button>
+    <span class="pdf-preview__count" *ngIf="totalPages">
+      Страниц: {{ totalPages }}
+    </span>
+  </div>
+
+  <div class="pdf-preview__viewport">
+    <div class="pdf-preview__status" *ngIf="loading">Загрузка PDF…</div>
+    <div class="pdf-preview__status pdf-preview__status--error" *ngIf="error">
+      {{ error }}
+    </div>
+    <div #pagesContainer class="pdf-preview__pages-list"></div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<div class="pdf-preview-page-wrapper">
+  <div class="pdf-preview-page-wrapper__info">
+    Компонент, реализованный через библиотеку pdfjs-dist
+  </div>
+  <import-file
+    (sourceChange)="onSourceChange($event)"
+    (urlChange)="onUrlInputChange($event)"
+  ></import-file>
+  <div class="pdf-preview-page-wrapper__preview">
+    <app-pdf-preview [src]="pdfSource"></app-pdf-preview>
+  </div>
+</div>
