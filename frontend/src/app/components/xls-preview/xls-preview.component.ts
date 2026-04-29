@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Input,
   OnChanges,
 } from "@angular/core";
@@ -20,18 +21,16 @@ export class XlsPreviewComponent implements OnChanges {
 
   @Input() src: FileSource;
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   async ngOnChanges(): Promise<void> {
     const arrayBuffer = await normalizeToArrayBuffer(this.src);
-    console.log("arrayBuffer", arrayBuffer);
-
     const workbook = xlsx.read(arrayBuffer, { type: "array" });
-    console.log("workbook", workbook);
-
     const data = xlsx.utils.sheet_to_html(
       workbook.Sheets[workbook.SheetNames[0]],
     );
-    console.log("data", data);
 
     this.htmlContent = data;
+    this.cdr.markForCheck();
   }
 }
