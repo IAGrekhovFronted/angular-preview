@@ -26,6 +26,8 @@ export class XlsPreviewComponent implements OnChanges {
   async ngOnChanges(): Promise<void> {
     const arrayBuffer = await normalizeToArrayBuffer(this.src);
     const workbook = xlsx.read(arrayBuffer, { type: "array" });
+
+    console.log("Workbook:", workbook);
     const data = xlsx.utils.sheet_to_html(
       workbook.Sheets[workbook.SheetNames[0]],
     );

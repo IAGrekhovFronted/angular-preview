@@ -19,7 +19,7 @@ export const normalizeToArrayBuffer = async (
   }
 
   if (src instanceof Blob) {
-    const buffer = await (src as Blob).arrayBuffer();
+    const buffer = await (src as any).arrayBuffer();
     return new Uint8Array(buffer).slice().buffer;
   }
 

@@ -11,6 +11,7 @@ import { DocxPreviewPage } from "./pages/docx-preview/docx-preview.page";
 import { DocxPreviewComponent } from "./components/docx-preview/docx-preview.component";
 import { XlsPreviewPage } from "./pages/xls-preview/xls-preview.page";
 import { XlsPreviewComponent } from "./components/xls-preview/xls-preview.component";
+import { XlsPreviewStyledComponent } from "./components/xls-preview-styled/xls-preview-styled.component";
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { XlsPreviewComponent } from "./components/xls-preview/xls-preview.compon
     DocxPreviewComponent,
     ImportFileComponent,
     XlsPreviewComponent,
+    XlsPreviewStyledComponent,
   ],
   imports: [BrowserModule, CommonModule, AppRoutingModule],
   providers: [],
