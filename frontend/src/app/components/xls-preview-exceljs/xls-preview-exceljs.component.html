@@ -1,0 +1,18 @@
+<div class="xls-preview-exceljs-wrapper">
+  <table *ngIf="rows.length">
+    <tbody>
+      <tr *ngFor="let row of rows; trackBy: trackRow">
+        <ng-container *ngFor="let cell of row; trackBy: trackCell">
+          <td
+            *ngIf="!cell.hidden"
+            [attr.colspan]="cell.colspan > 1 ? cell.colspan : null"
+            [attr.rowspan]="cell.rowspan > 1 ? cell.rowspan : null"
+            [ngStyle]="cell.style"
+          >
+            {{ cell.display }}
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
+</div>

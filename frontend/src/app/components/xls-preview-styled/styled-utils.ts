@@ -9,23 +9,25 @@ export interface CellView {
 }
 
 /**
- * Палитра темы Office 2007 — community SheetJS не парсит theme1.xml,
- * поэтому используем стандартный набор как разумный fallback.
- * Индексы 0/1 и 2/3 в OOXML переставлены по сравнению с порядком в clrScheme.
+ * Дефолтная палитра темы Office 2013+ (актуальная для Excel 2013+/
+ * LibreOffice/Google Sheets — большинство современных xlsx-файлов).
+ * Используется как fallback, когда для cell.s.fgColor пришёл
+ * { theme: N } без разрешения в RGB.
+ * Индексы 0/1 и 2/3 в OOXML переставлены относительно порядка в clrScheme.
  */
 const OFFICE_THEME_RGB = [
   "FFFFFF", // 0 lt1
   "000000", // 1 dk1
-  "EEECE1", // 2 lt2
-  "1F497D", // 3 dk2
-  "4F81BD", // 4 accent1
-  "C0504D", // 5 accent2
-  "9BBB59", // 6 accent3
-  "8064A2", // 7 accent4
-  "4BACC6", // 8 accent5
-  "F79646", // 9 accent6
-  "0000FF", // 10 hlink
-  "800080", // 11 folHlink
+  "E7E6E6", // 2 lt2
+  "44546A", // 3 dk2
+  "5B9BD5", // 4 accent1
+  "ED7D31", // 5 accent2
+  "A5A5A5", // 6 accent3
+  "FFC000", // 7 accent4
+  "4472C4", // 8 accent5
+  "70AD47", // 9 accent6
+  "0563C1", // 10 hlink
+  "954F72", // 11 folHlink
 ];
 
 const INDEXED_PALETTE: { [k: number]: string } = {
@@ -94,11 +96,30 @@ export const resolveColor = (c: any): string | null => {
   return "#" + hex.toUpperCase();
 };
 
+const toNumberId = (...candidates: any[]): number | undefined => {
+  for (const c of candidates) {
+    if (c === undefined || c === null || c === "") continue;
+    const n = typeof c === "number" ? c : Number(c);
+    if (Number.isFinite(n)) return n;
+  }
+  return undefined;
+};
+
+const isFontObject = (o: any): boolean =>
+  !!o &&
+  typeof o === "object" &&
+  ("name" in o || "bold" in o || "sz" in o || "color" in o || "italic" in o);
+
+const isBorderObject = (o: any): boolean =>
+  !!o &&
+  typeof o === "object" &&
+  ("top" in o || "bottom" in o || "left" in o || "right" in o);
+
 /**
  * В community SheetJS при cellStyles:true cell.s — это запись CellXf
- * с полями fontId/fillId/borderId/alignment, а не уже разрешённый объект.
- * Здесь подтягиваем настоящие Font/Fill/Border из wb.Styles.
- * На всякий случай также поддерживаем уже-разрешённую форму (s.font/s.fgColor).
+ * (со ссылками fontId/fillId/borderId), а не разрешённый объект.
+ * Часть полей дублируется в lowercase (fontid/fillid/borderid) — учитываем оба.
+ * На всякий случай поддерживаем и уже-разрешённую форму (s.font/s.fgColor).
  */
 export const buildCellStyle = (
   s: any,
@@ -111,18 +132,26 @@ export const buildCellStyle = (
   const fills = (styles && styles.Fills) || [];
   const borders = (styles && styles.Borders) || [];
 
-  const font =
-    s.font ||
-    (typeof s.fontId === "number" ? fonts[s.fontId] : undefined);
+  const fontId = toNumberId(s.fontId, s.fontid);
+  const fillId = toNumberId(s.fillId, s.fillid);
+  const borderId = toNumberId(s.borderId, s.borderid);
+
+  const font = isFontObject(s.font)
+    ? s.font
+    : fontId !== undefined
+    ? fonts[fontId]
+    : undefined;
   const fill =
     s.patternType !== undefined
       ? s
-      : typeof s.fillId === "number"
-      ? fills[s.fillId]
+      : fillId !== undefined
+      ? fills[fillId]
       : undefined;
-  const border =
-    s.border ||
-    (typeof s.borderId === "number" ? borders[s.borderId] : undefined);
+  const border = isBorderObject(s.border)
+    ? s.border
+    : borderId !== undefined
+    ? borders[borderId]
+    : undefined;
 
   if (fill && fill.patternType === "solid" && fill.fgColor) {
     const bg = resolveColor(fill.fgColor);

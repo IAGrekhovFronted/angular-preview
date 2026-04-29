@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { CommonModule, NgStyle } from "@angular/common";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -12,6 +12,7 @@ import { DocxPreviewComponent } from "./components/docx-preview/docx-preview.com
 import { XlsPreviewPage } from "./pages/xls-preview/xls-preview.page";
 import { XlsPreviewComponent } from "./components/xls-preview/xls-preview.component";
 import { XlsPreviewStyledComponent } from "./components/xls-preview-styled/xls-preview-styled.component";
+import { XlsPreviewExceljsComponent } from "./components/xls-preview-exceljs/xls-preview-exceljs.component";
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { XlsPreviewStyledComponent } from "./components/xls-preview-styled/xls-p
     ImportFileComponent,
     XlsPreviewComponent,
     XlsPreviewStyledComponent,
+    XlsPreviewExceljsComponent,
   ],
   imports: [BrowserModule, CommonModule, AppRoutingModule],
   providers: [],
