@@ -1,0 +1,12 @@
+<div class="xls-preview-page-wrapper">
+  <div class="xls-preview-page-wrapper__info">
+    Компонент, реализованный через библиотеку SheetJS
+  </div>
+  <import-file
+    (sourceChange)="onSourceChange($event)"
+    (urlChange)="onUrlInputChange($event)"
+  ></import-file>
+  <div class="xls-preview-page-wrapper__preview">
+    <app-xls-preview [src]="xlsSource"></app-xls-preview>
+  </div>
+</div>
