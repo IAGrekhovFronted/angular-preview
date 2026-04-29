@@ -8,9 +8,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/pdfjs/pdf.worker.min.js";
 
 export { pdfjsLib };
 
-export type PdfSource = string | Uint8Array | ArrayBuffer | null | undefined;
+export type FileSource = string | Uint8Array | ArrayBuffer | null | undefined;
 
-export function normalizeSource(src: PdfSource): any {
+export function normalizeSource(src: FileSource): any {
   if (typeof src === "string") {
     return { url: src };
   }
