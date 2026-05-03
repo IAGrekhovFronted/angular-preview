@@ -7,10 +7,10 @@ export interface CellView {
 }
 
 /**
- * exceljs не разворачивает theme1.xml в палитру — цвета приходят
- * как { theme: N, tint?: T }. Используем дефолтную палитру Office 2013+
- * (актуальная для Excel 2013+/LibreOffice/Google Sheets — большинство файлов).
- * Индексы 0/1 и 2/3 в OOXML переставлены относительно порядка в clrScheme.
+ * Excel может хранить цвета не напрямую (HEX), а через ссылки:
+ * - theme — индекс цвета из темы (OFFICE_THEME_RGB)
+ * - indexed — индекс из стандартной палитры (INDEXED_PALETTE)
+ * Эти мапы нужны, чтобы преобразовать такие ссылки в реальные HEX-цвета для CSS.
  */
 const OFFICE_THEME_RGB = [
   "FFFFFF", // 0 lt1
@@ -97,6 +97,13 @@ const resolveColor = (color: any): string | null => {
   return "#" + hex.toUpperCase();
 };
 
+/**
+ * Преобразование стилей ячейки из формата ExcelJS в CSS-стили для рендера таблицы
+ * фон (fill)
+ * шрифт (font)
+ * выравнивание (alignment)
+ * границы (border)
+ */
 const buildCellStyle = (cell: any): { [k: string]: string } => {
   const out: { [k: string]: string } = {};
   if (!cell) return out;
@@ -147,6 +154,9 @@ const buildCellStyle = (cell: any): { [k: string]: string } => {
   return out;
 };
 
+/**
+ * Хелпер для извлечени значения из ячейки с учетом разных типов данных и формул
+ */
 const cellDisplay = (cell: any): string => {
   if (!cell) return "";
   if (cell.text !== undefined && cell.text !== null && cell.text !== "") {
@@ -165,14 +175,25 @@ const cellDisplay = (cell: any): string => {
   return String(v);
 };
 
+/**
+ * Преобразование буквенных обозначений колонок в числовое представление
+ */
 const colLetterToIndex = (s: string): number => {
   let n = 0;
   for (let i = 0; i < s.length; i++) {
+    /**
+     * 26 - количество букв в английском алфавите. Умножаем на 26, чтобы сдвинуть разряд влево, и добавляем значение текущей буквы.
+     * Например, для "AB": сначала n = 0 * 26 + (1) = 1, затем n = 1 * 26 + (2) = 28, что соответствует колонке AB
+     * charCodeAt для 'A' возвращает 65, для 'B' - 66 и так далее. Вычитаем 64, чтобы 'A' стало 1, 'B' - 2 и так далее
+     */
     n = n * 26 + (s.charCodeAt(i) - 64);
   }
   return n;
 };
 
+/**
+ * Преобразуем адреса ячеек и диапазонов из формата Excel (например, "B2" или "C3:D5") в координаты { r: number; c: number }.
+ */
 const parseAddress = (addr: string): { r: number; c: number } | null => {
   const m = /^([A-Z]+)(\d+)$/.exec(addr);
   if (!m) return null;
@@ -190,37 +211,29 @@ const parseRange = (
   return { s, e };
 };
 
-const collectMerges = (
-  ws: any,
-): Array<{ s: { r: number; c: number }; e: { r: number; c: number } }> => {
-  const out: Array<{
-    s: { r: number; c: number };
-    e: { r: number; c: number };
-  }> = [];
+/**
+ * Ищем colspan и rowspan
+ */
+const collectMerges = (ws: any) => {
+  /**
+   * ws.model.merges - массив строковых диапазонов, например ["B2:D5", "F1:F3"].
+   * Если его нет, значит на листе нет объединенных ячеек — возвращаем пустой массив.
+   */
+  const model = ws.model;
+  const merges = model && model.merges;
 
-  const fromModel: string[] =
-    (ws.model && Array.isArray(ws.model.merges) && ws.model.merges) || [];
-  for (const r of fromModel) {
-    const p = parseRange(r);
-    if (p) out.push(p);
-  }
-  if (out.length) return out;
+  if (!Array.isArray(merges)) return [];
 
-  const internal = ws._merges;
-  if (internal && typeof internal === "object") {
-    for (const k of Object.keys(internal)) {
-      const m = internal[k];
-      const range =
-        (m && (m.range || (m.tl && m.br ? m.tl + ":" + m.br : null))) || k;
-      const p = parseRange(range);
-      if (p) out.push(p);
-    }
-  }
-  return out;
+  return merges.map(parseRange).filter((p): p is NonNullable<typeof p> => !!p);
 };
 
 export const buildRowsFromExceljs = (ws: any): CellView[][] => {
   if (!ws) return [];
+  /**
+   * dimensions - это координаты прямоугольной области, в которой есть данные на листе Excel
+   * Например, координаты ячеек в Excel B2:D5 будут иметь dimensions { top: 2, left: 2, bottom: 5, right: 4 }
+   * С помощью координат задаем границы обхода таблицы. Если dimensions нет, значит лист пустой — возвращаем пустой массив.
+   */
   const dim = ws.dimensions;
   if (!dim) return [];
 
@@ -229,9 +242,24 @@ export const buildRowsFromExceljs = (ws: any): CellView[][] => {
   const bottom = dim.bottom || top;
   const right = dim.right || left;
 
+  /**
+   * Получаем числовые координаты объединенных ячеек на листе Excel
+   */
   const merges = collectMerges(ws);
+
+  // covered - множество координат ячеек, которые покрыты объединением (кроме верхней левой ячейки объединения)
   const covered = new Set<string>();
+
+  /**
+   * anchors - координаты верхних левых ячеек объединений, сопоставленных с их colspan и rowspan
+   * Например,
+   * [ B2 ][ C2 ][ D2 ]
+   * [ B3 ][ C3 ][ D3 ]
+   *
+   * anchors["2,2"] = { colspan: 3, rowspan: 2 }
+   */
   const anchors: { [k: string]: { colspan: number; rowspan: number } } = {};
+
   for (const m of merges) {
     anchors[m.s.r + "," + m.s.c] = {
       colspan: m.e.c - m.s.c + 1,
@@ -245,10 +273,15 @@ export const buildRowsFromExceljs = (ws: any): CellView[][] => {
     }
   }
 
+  /**
+   * Построение матрицы для рендера таблицы
+   */
   const rows: CellView[][] = [];
+  // Проходимся по всем строкам
   for (let r = top; r <= bottom; r++) {
     const wsRow = ws.getRow(r);
     const row: CellView[] = [];
+    // Проходимся по всем колонкам
     for (let c = left; c <= right; c++) {
       const key = r + "," + c;
       if (covered.has(key)) {
@@ -261,6 +294,11 @@ export const buildRowsFromExceljs = (ws: any): CellView[][] => {
         });
         continue;
       }
+
+      /**
+       * API либы
+       * Получаем объект ячейки по номеру. Он может содержать свойства value, text, fill, font, alignment, border и другие.
+       */
       const cell = wsRow.getCell(c);
       const a = anchors[key];
       row.push({
