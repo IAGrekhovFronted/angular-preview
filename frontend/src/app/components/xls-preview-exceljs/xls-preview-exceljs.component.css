@@ -1,0 +1,20 @@
+.xls-preview-exceljs-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.xls-preview-exceljs-wrapper table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+}
+
+.xls-preview-exceljs-wrapper td {
+  padding: 4px 8px;
+  min-width: 60px;
+  vertical-align: middle;
+  font-family: "Liberation Sans", Arial, sans-serif;
+  font-size: 10pt;
+  white-space: nowrap;
+}

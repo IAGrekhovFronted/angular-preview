@@ -1,0 +1,16 @@
+.xls-preview-component-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.xls-preview-component-wrapper ::ng-deep table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.xls-preview-component-wrapper ::ng-deep th,
+.xls-preview-component-wrapper ::ng-deep td {
+  border: 1px solid #000000;
+  padding: 8px;
+}
