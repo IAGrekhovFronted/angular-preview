@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable, NgZone, OnDestroy } from "@angular/core";
+import { PDFDocumentProxy, PDFRenderTask } from "pdfjs-dist/build/pdf";
 
 import {
   clearChildren,
@@ -20,8 +21,8 @@ export class PdfRendererService implements OnDestroy {
   readonly totalPagesChange = new EventEmitter<number>();
 
   private container: HTMLElement | null = null;
-  private pdfDoc: any = null;
-  private renderTasks: any[] = [];
+  private pdfDoc: PDFDocumentProxy | null = null;
+  private renderTasks: PDFRenderTask[] = [];
   private destroyed = false;
   private loadToken = 0;
   private currentScale = 1;
@@ -121,10 +122,11 @@ export class PdfRendererService implements OnDestroy {
   }
 
   private async renderPage(pageNumber: number, token: number): Promise<void> {
-    if (!this.container) {
+    if (!this.container || !this.pdfDoc) {
       return;
     }
-    const page = await this.pdfDoc.getPage(pageNumber);
+    const pdfDoc = this.pdfDoc;
+    const page = await pdfDoc.getPage(pageNumber);
     if (this.destroyed || token !== this.loadToken) {
       return;
     }

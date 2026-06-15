@@ -10,7 +10,10 @@ export { pdfjsLib };
 
 export type FileSource = string | Uint8Array | ArrayBuffer | null | undefined;
 
-export function normalizeSource(src: FileSource): any {
+export function normalizeSource(src: FileSource): pdfjsLib.PDFDocumentSource {
+  if (!src) {
+    throw new Error("PDF source is empty");
+  }
   if (typeof src === "string") {
     return { url: src };
   }

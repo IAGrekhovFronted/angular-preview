@@ -1,24 +1,46 @@
 declare module "pdfjs-dist/build/pdf" {
   export interface GlobalWorkerOptionsType {
     workerSrc: string;
-    workerPort: any;
+    workerPort: Worker | null;
   }
 
   export const GlobalWorkerOptions: GlobalWorkerOptionsType;
   export const version: string;
 
-  export function getDocument(src: any): {
+  export interface PDFDocumentSource {
+    url?: string;
+    data?: Uint8Array;
+  }
+
+  export interface PDFPageViewport {
+    width: number;
+    height: number;
+    transform: number[];
+    [key: string]: unknown;
+  }
+
+  export interface PDFTextContent {
+    items: unknown[];
+    styles: { [key: string]: unknown };
+  }
+
+  export interface PDFRenderTask {
+    promise: Promise<void>;
+    cancel(): void;
+  }
+
+  export function getDocument(src: PDFDocumentSource): {
     promise: Promise<PDFDocumentProxy>;
   };
 
   export function renderTextLayer(params: {
-    textContent: any;
+    textContent: PDFTextContent;
     container: HTMLElement;
-    viewport: any;
+    viewport: PDFPageViewport;
     textDivs?: HTMLElement[];
     enhanceTextSelection?: boolean;
     timeout?: number;
-  }): { promise: Promise<void>; cancel(): void };
+  }): PDFRenderTask;
 
   export interface PDFDocumentProxy {
     numPages: number;
@@ -27,12 +49,12 @@ declare module "pdfjs-dist/build/pdf" {
   }
 
   export interface PDFPageProxy {
-    getViewport(params: { scale: number; rotation?: number }): any;
+    getViewport(params: { scale: number; rotation?: number }): PDFPageViewport;
     render(params: {
       canvasContext: CanvasRenderingContext2D;
-      viewport: any;
+      viewport: PDFPageViewport;
       transform?: number[] | null;
-    }): { promise: Promise<void>; cancel(): void };
-    getTextContent(): Promise<any>;
+    }): PDFRenderTask;
+    getTextContent(): Promise<PDFTextContent>;
   }
 }
