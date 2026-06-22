@@ -1,11 +1,13 @@
-import { EventEmitter, Injectable, NgZone, OnDestroy } from "@angular/core";
+import { Injectable, NgZone, OnDestroy } from "@angular/core";
 import { PDFDocumentProxy, PDFRenderTask } from "pdfjs-dist/build/pdf";
+import { BehaviorSubject } from "rxjs";
 
 import {
   clearChildren,
   createPdfPageDom,
   hiDpiTransform,
 } from "./pdf-page-dom";
+import { AsyncGeneration } from "./async-generation";
 import {
   errorMessage,
   isCancelledError,
@@ -14,23 +16,43 @@ import {
   FileSource,
 } from "./pdfjs-setup";
 
+export interface PdfPreviewState {
+  loading: boolean;
+  error: string | null;
+  totalPages: number;
+}
+
+export const initialPdfPreviewState: PdfPreviewState = {
+  loading: false,
+  error: null,
+  totalPages: 0,
+};
+
+interface PendingPdfLoad {
+  src: FileSource;
+  scale: number;
+}
+
 @Injectable()
 export class PdfRendererService implements OnDestroy {
-  readonly loadingChange = new EventEmitter<boolean>();
-  readonly errorChange = new EventEmitter<string | null>();
-  readonly totalPagesChange = new EventEmitter<number>();
+  private readonly stateSubject = new BehaviorSubject<PdfPreviewState>(
+    initialPdfPreviewState,
+  );
+
+  readonly state$ = this.stateSubject.asObservable();
 
   private container: HTMLElement | null = null;
+  private pendingLoad: PendingPdfLoad | null = null;
   private pdfDoc: PDFDocumentProxy | null = null;
   private renderTasks: PDFRenderTask[] = [];
-  private destroyed = false;
-  private loadToken = 0;
+  private readonly loadGeneration = new AsyncGeneration();
   private currentScale = 1;
 
   constructor(private zone: NgZone) {}
 
   ngOnDestroy(): void {
-    this.destroyed = true;
+    this.loadGeneration.invalidate();
+    this.pendingLoad = null;
     this.cancelRenderTasks();
     if (this.pdfDoc) {
       this.pdfDoc.destroy();
@@ -40,11 +62,21 @@ export class PdfRendererService implements OnDestroy {
 
   attachContainer(el: HTMLElement): void {
     this.container = el;
+    if (this.pendingLoad) {
+      const pendingLoad = this.pendingLoad;
+      this.pendingLoad = null;
+      void this.load(pendingLoad.src, pendingLoad.scale);
+    }
   }
 
   async load(src: FileSource, scale: number): Promise<void> {
     this.currentScale = scale;
-    const token = ++this.loadToken;
+    if (!this.container) {
+      this.pendingLoad = { src, scale };
+      return;
+    }
+
+    const generation = this.loadGeneration.begin();
     this.cancelRenderTasks();
     clearChildren(this.container);
     if (this.pdfDoc) {
@@ -52,54 +84,58 @@ export class PdfRendererService implements OnDestroy {
       this.pdfDoc = null;
     }
 
-    this.loadingChange.emit(true);
-    this.errorChange.emit(null);
-    this.totalPagesChange.emit(0);
+    this.patchState({ loading: true, error: null, totalPages: 0 });
 
     try {
       const pdf = await this.zone.runOutsideAngular(
         () => pdfjsLib.getDocument(normalizeSource(src)).promise,
       );
-      if (this.destroyed || token !== this.loadToken) {
+      if (this.loadGeneration.isStale(generation)) {
         await pdf.destroy();
         return;
       }
       this.pdfDoc = pdf;
-      this.totalPagesChange.emit(pdf.numPages);
-      await this.renderAllPages(token);
+      this.patchState({ totalPages: pdf.numPages });
+      await this.renderAllPages(generation);
     } catch (err) {
-      if (this.destroyed || token !== this.loadToken) {
+      if (this.loadGeneration.isStale(generation)) {
         return;
       }
-      this.errorChange.emit(errorMessage(err) || "Не удалось загрузить PDF");
+      this.patchState({
+        error: errorMessage(err) || "Не удалось загрузить PDF",
+      });
     } finally {
-      if (!this.destroyed && token === this.loadToken) {
-        this.loadingChange.emit(false);
+      if (!this.loadGeneration.isStale(generation)) {
+        this.patchState({ loading: false });
       }
     }
   }
 
   async rerender(scale: number): Promise<void> {
     this.currentScale = scale;
+    if (this.pendingLoad) {
+      this.pendingLoad = { ...this.pendingLoad, scale };
+      return;
+    }
     if (!this.pdfDoc) {
       return;
     }
-    await this.renderAllPages(this.loadToken);
+    await this.renderAllPages(this.loadGeneration.current());
   }
 
   reset(): void {
+    this.loadGeneration.invalidate();
+    this.pendingLoad = null;
     this.cancelRenderTasks();
     clearChildren(this.container);
     if (this.pdfDoc) {
       this.pdfDoc.destroy();
       this.pdfDoc = null;
     }
-    this.totalPagesChange.emit(0);
-    this.errorChange.emit(null);
-    this.loadingChange.emit(false);
+    this.stateSubject.next(initialPdfPreviewState);
   }
 
-  private async renderAllPages(token: number): Promise<void> {
+  private async renderAllPages(generation: number): Promise<void> {
     this.cancelRenderTasks();
     clearChildren(this.container);
     if (!this.pdfDoc || !this.container) {
@@ -107,11 +143,11 @@ export class PdfRendererService implements OnDestroy {
     }
     const total = this.pdfDoc.numPages;
     for (let i = 1; i <= total; i++) {
-      if (this.destroyed || token !== this.loadToken) {
+      if (this.loadGeneration.isStale(generation)) {
         return;
       }
       try {
-        await this.renderPage(i, token);
+        await this.renderPage(i, generation);
       } catch (err) {
         if (isCancelledError(err)) {
           return;
@@ -121,13 +157,16 @@ export class PdfRendererService implements OnDestroy {
     }
   }
 
-  private async renderPage(pageNumber: number, token: number): Promise<void> {
+  private async renderPage(
+    pageNumber: number,
+    generation: number,
+  ): Promise<void> {
     if (!this.container || !this.pdfDoc) {
       return;
     }
     const pdfDoc = this.pdfDoc;
     const page = await pdfDoc.getPage(pageNumber);
-    if (this.destroyed || token !== this.loadToken) {
+    if (this.loadGeneration.isStale(generation)) {
       return;
     }
 
@@ -146,12 +185,12 @@ export class PdfRendererService implements OnDestroy {
     this.renderTasks.push(renderTask);
     await renderTask.promise;
 
-    if (this.destroyed || token !== this.loadToken) {
+    if (this.loadGeneration.isStale(generation)) {
       return;
     }
 
     const textContent = await page.getTextContent();
-    if (this.destroyed || token !== this.loadToken) {
+    if (this.loadGeneration.isStale(generation)) {
       return;
     }
 
@@ -175,5 +214,12 @@ export class PdfRendererService implements OnDestroy {
       }
     }
     this.renderTasks = [];
+  }
+
+  private patchState(patch: Partial<PdfPreviewState>): void {
+    this.stateSubject.next({
+      ...this.stateSubject.value,
+      ...patch,
+    });
   }
 }

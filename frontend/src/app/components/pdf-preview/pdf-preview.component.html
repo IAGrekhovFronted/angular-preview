@@ -4,7 +4,7 @@
       type="button"
       class="pdf-preview__btn"
       (click)="zoomOut()"
-      [disabled]="loading || !totalPages"
+      [disabled]="state.loading || !state.totalPages"
       title="Уменьшить"
     >
       −
@@ -14,20 +14,20 @@
       type="button"
       class="pdf-preview__btn"
       (click)="zoomIn()"
-      [disabled]="loading || !totalPages"
+      [disabled]="state.loading || !state.totalPages"
       title="Увеличить"
     >
       +
     </button>
-    <span class="pdf-preview__count" *ngIf="totalPages">
-      Страниц: {{ totalPages }}
+    <span class="pdf-preview__count" *ngIf="state.totalPages">
+      Страниц: {{ state.totalPages }}
     </span>
   </div>
 
   <div class="pdf-preview__viewport">
-    <div class="pdf-preview__status" *ngIf="loading">Загрузка PDF…</div>
-    <div class="pdf-preview__status pdf-preview__status--error" *ngIf="error">
-      {{ error }}
+    <div class="pdf-preview__status" *ngIf="state.loading">Загрузка PDF…</div>
+    <div class="pdf-preview__status pdf-preview__status--error" *ngIf="state.error">
+      {{ state.error }}
     </div>
     <div #pagesContainer class="pdf-preview__pages-list"></div>
   </div>

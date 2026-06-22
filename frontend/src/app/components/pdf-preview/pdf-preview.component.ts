@@ -13,7 +13,11 @@ import {
 } from "@angular/core";
 import { Subscription } from "rxjs";
 
-import { PdfRendererService } from "./pdf-renderer.service";
+import {
+  initialPdfPreviewState,
+  PdfPreviewState,
+  PdfRendererService,
+} from "./pdf-renderer.service";
 import { FileSource } from "./pdfjs-setup";
 
 @Component({
@@ -31,15 +35,12 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild("pagesContainer", { static: true })
   pagesContainer!: ElementRef<HTMLDivElement>;
 
-  loading = false;
-  error: string | null = null;
-  totalPages = 0;
+  state: PdfPreviewState = initialPdfPreviewState;
 
   get scalePercent(): number {
     return Math.round(this.scale * 100);
   }
 
-  private initialized = false;
   private subs = new Subscription();
 
   constructor(
@@ -48,36 +49,16 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.subs.add(
+      this.renderer.state$.subscribe((state) => {
+        this.state = state;
+        this.cdr.markForCheck();
+      }),
+    );
     this.renderer.attachContainer(this.pagesContainer.nativeElement);
-    this.subs.add(
-      this.renderer.loadingChange.subscribe((v: boolean) => {
-        this.loading = v;
-        this.cdr.markForCheck();
-      }),
-    );
-    this.subs.add(
-      this.renderer.errorChange.subscribe((v: string | null) => {
-        this.error = v;
-        this.cdr.markForCheck();
-      }),
-    );
-    this.subs.add(
-      this.renderer.totalPagesChange.subscribe((v: number) => {
-        this.totalPages = v;
-        this.cdr.markForCheck();
-      }),
-    );
-
-    this.initialized = true;
-    if (this.src) {
-      this.renderer.load(this.src, this.scale);
-    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.initialized) {
-      return;
-    }
     if (changes.src) {
       if (this.src) {
         this.renderer.load(this.src, this.scale);
