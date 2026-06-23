@@ -171,14 +171,14 @@ export class PdfRendererService implements OnDestroy {
     }
 
     const viewport = page.getViewport({ scale: this.currentScale });
-    const { pageEl, canvas, textLayerDiv } = createPdfPageDom(
+    const { pageEl, canvasEl, textLayerEl } = createPdfPageDom(
       pageNumber,
       viewport,
     );
     this.container.appendChild(pageEl);
 
     const renderTask = page.render({
-      canvasContext: canvas.getContext("2d") as CanvasRenderingContext2D,
+      canvasContext: canvasEl.getContext("2d") as CanvasRenderingContext2D,
       viewport,
       transform: hiDpiTransform(),
     });
@@ -196,7 +196,7 @@ export class PdfRendererService implements OnDestroy {
 
     const textLayerTask = pdfjsLib.renderTextLayer({
       textContent,
-      container: textLayerDiv,
+      container: textLayerEl,
       viewport,
       textDivs: [],
       enhanceTextSelection: true,

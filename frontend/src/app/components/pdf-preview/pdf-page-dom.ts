@@ -1,7 +1,7 @@
 export interface PdfPageDom {
   pageEl: HTMLDivElement;
-  canvas: HTMLCanvasElement;
-  textLayerDiv: HTMLDivElement;
+  canvasEl: HTMLCanvasElement;
+  textLayerEl: HTMLDivElement;
 }
 
 export function createPdfPageDom(
@@ -11,29 +11,31 @@ export function createPdfPageDom(
   const devicePixelRatio = window.devicePixelRatio || 1;
   const scaledWidth = Math.floor(viewport.width);
   const scaledHeight = Math.floor(viewport.height);
+  const cssWidth = `${scaledWidth}px`;
+  const cssHeight = `${scaledHeight}px`;
 
   const pageEl = document.createElement("div");
   pageEl.className = "pdf-page";
   pageEl.setAttribute("data-page-number", String(pageNumber));
-  pageEl.style.width = scaledWidth + "px";
-  pageEl.style.height = scaledHeight + "px";
+  pageEl.style.width = cssWidth;
+  pageEl.style.height = cssHeight;
 
-  const canvas = document.createElement("canvas");
-  canvas.className = "pdf-page__canvas";
-  canvas.width = Math.floor(scaledWidth * devicePixelRatio);
-  canvas.height = Math.floor(scaledHeight * devicePixelRatio);
-  canvas.style.width = scaledWidth + "px";
-  canvas.style.height = scaledHeight + "px";
+  const canvasEl = document.createElement("canvas");
+  canvasEl.className = "pdf-page__canvas";
+  canvasEl.width = Math.floor(scaledWidth * devicePixelRatio);
+  canvasEl.height = Math.floor(scaledHeight * devicePixelRatio);
+  canvasEl.style.width = cssWidth;
+  canvasEl.style.height = cssHeight;
 
-  const textLayerDiv = document.createElement("div");
-  textLayerDiv.className = "textLayer";
-  textLayerDiv.style.width = scaledWidth + "px";
-  textLayerDiv.style.height = scaledHeight + "px";
+  const textLayerEl = document.createElement("div");
+  textLayerEl.className = "textLayer";
+  textLayerEl.style.width = cssWidth;
+  textLayerEl.style.height = cssHeight;
 
-  pageEl.appendChild(canvas);
-  pageEl.appendChild(textLayerDiv);
+  pageEl.appendChild(canvasEl);
+  pageEl.appendChild(textLayerEl);
 
-  return { pageEl, canvas, textLayerDiv };
+  return { pageEl, canvasEl, textLayerEl };
 }
 
 export function hiDpiTransform(): number[] | null {
