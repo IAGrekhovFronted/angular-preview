@@ -1,9 +1,16 @@
+/**
+ * DOM-элементы, необходимые для отображения одной страницы PDF.
+ */
 export interface PdfPageDom {
   pageEl: HTMLDivElement;
   canvasEl: HTMLCanvasElement;
   textLayerEl: HTMLDivElement;
 }
 
+/**
+ * Создает DOM-структуру страницы PDF: контейнер страницы, canvas для растра
+ * и текстовый слой для выделения/поиска текста.
+ */
 export function createPdfPageDom(
   pageNumber: number,
   viewport: { width: number; height: number },
@@ -38,11 +45,17 @@ export function createPdfPageDom(
   return { pageEl, canvasEl, textLayerEl };
 }
 
+/**
+ * Возвращает transform для отрисовки canvas с учетом devicePixelRatio.
+ */
 export function hiDpiTransform(): number[] | null {
   const dpr = window.devicePixelRatio || 1;
   return dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null;
 }
 
+/**
+ * Удаляет все дочерние элементы из контейнера, если контейнер существует.
+ */
 export function clearChildren(el: HTMLElement | null | undefined): void {
   if (!el) {
     return;

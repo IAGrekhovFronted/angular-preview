@@ -30,7 +30,7 @@ import { FileSource } from "./pdfjs-setup";
 })
 export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   @Input() src: FileSource;
-  @Input() scale = 1.25;
+  @Input() scale = 100;
 
   @ViewChild("pagesContainer", { static: true })
   pagesContainer!: ElementRef<HTMLDivElement>;
@@ -38,7 +38,7 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   state: PdfPreviewState = initialPdfPreviewState;
 
   get scalePercent(): number {
-    return Math.round(this.scale * 100);
+    return Math.round(this.scale);
   }
 
   private subs = new Subscription();
@@ -61,14 +61,14 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.src) {
       if (this.src) {
-        this.renderer.load(this.src, this.scale);
+        this.renderer.load(this.src, this.renderScale);
       } else {
         this.renderer.reset();
       }
       return;
     }
     if (changes.scale && !changes.scale.firstChange) {
-      this.renderer.rerender(this.scale);
+      this.renderer.rerender(this.renderScale);
     }
   }
 
@@ -77,16 +77,20 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   zoomIn(): void {
-    this.setScale(this.scale + 0.25);
+    this.setScale(this.scale + 25);
   }
 
   zoomOut(): void {
-    this.setScale(this.scale - 0.25);
+    this.setScale(this.scale - 25);
   }
 
   private setScale(next: number): void {
-    this.scale = Math.min(4, Math.max(0.25, +next.toFixed(2)));
+    this.scale = Math.min(400, Math.max(25, Math.round(next)));
     this.cdr.markForCheck();
-    this.renderer.rerender(this.scale);
+    this.renderer.rerender(this.renderScale);
+  }
+
+  private get renderScale(): number {
+    return this.scale / 100;
   }
 }

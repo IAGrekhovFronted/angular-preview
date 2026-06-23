@@ -30,7 +30,7 @@ export const initialPdfPreviewState: PdfPreviewState = {
 
 interface PendingPdfLoad {
   src: FileSource;
-  scale: number;
+  scaleFactor: number;
 }
 
 @Injectable()
@@ -46,7 +46,7 @@ export class PdfRendererService implements OnDestroy {
   private pdfDoc: PDFDocumentProxy | null = null;
   private renderTasks: PDFRenderTask[] = [];
   private readonly loadGeneration = new AsyncGeneration();
-  private currentScale = 1;
+  private currentScaleFactor = 1;
 
   constructor(private zone: NgZone) {}
 
@@ -65,14 +65,14 @@ export class PdfRendererService implements OnDestroy {
     if (this.pendingLoad) {
       const pendingLoad = this.pendingLoad;
       this.pendingLoad = null;
-      void this.load(pendingLoad.src, pendingLoad.scale);
+      void this.load(pendingLoad.src, pendingLoad.scaleFactor);
     }
   }
 
-  async load(src: FileSource, scale: number): Promise<void> {
-    this.currentScale = scale;
+  async load(src: FileSource, scaleFactor: number): Promise<void> {
+    this.currentScaleFactor = scaleFactor;
     if (!this.container) {
-      this.pendingLoad = { src, scale };
+      this.pendingLoad = { src, scaleFactor };
       return;
     }
 
@@ -111,10 +111,10 @@ export class PdfRendererService implements OnDestroy {
     }
   }
 
-  async rerender(scale: number): Promise<void> {
-    this.currentScale = scale;
+  async rerender(scaleFactor: number): Promise<void> {
+    this.currentScaleFactor = scaleFactor;
     if (this.pendingLoad) {
-      this.pendingLoad = { ...this.pendingLoad, scale };
+      this.pendingLoad = { ...this.pendingLoad, scaleFactor };
       return;
     }
     if (!this.pdfDoc) {
@@ -170,7 +170,7 @@ export class PdfRendererService implements OnDestroy {
       return;
     }
 
-    const viewport = page.getViewport({ scale: this.currentScale });
+    const viewport = page.getViewport({ scale: this.currentScaleFactor });
     const { pageEl, canvasEl, textLayerEl } = createPdfPageDom(
       pageNumber,
       viewport,
