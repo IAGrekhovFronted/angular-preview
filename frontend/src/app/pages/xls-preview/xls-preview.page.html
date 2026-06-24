@@ -1,0 +1,22 @@
+<div class="xls-preview-page-wrapper">
+  <import-file
+    (sourceChange)="onSourceChange($event)"
+    (urlChange)="onUrlInputChange($event)"
+  ></import-file>
+  <div class="xls-preview-page-wrapper__info">Рендер через ExcelJS:</div>
+  <div class="xls-preview-page-wrapper__preview">
+    <app-xls-preview-exceljs [src]="xlsSource"></app-xls-preview-exceljs>
+  </div>
+  <div class="xls-preview-page-wrapper__info">
+    Стилизованный рендер (со стилями ячеек):
+  </div>
+  <div class="xls-preview-page-wrapper__preview">
+    <app-xls-preview-styled [src]="xlsSource"></app-xls-preview-styled>
+  </div>
+  <div class="xls-preview-page-wrapper__info">
+    Компонент, реализованный через библиотеку SheetJS
+  </div>
+  <div class="xls-preview-page-wrapper__preview">
+    <app-xls-preview [src]="xlsSource"></app-xls-preview>
+  </div>
+</div>
