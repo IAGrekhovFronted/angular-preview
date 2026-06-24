@@ -28,11 +28,6 @@ export const initialPdfPreviewState: PdfPreviewState = {
   totalPages: 0,
 };
 
-interface PendingPdfLoad {
-  src: FileSource;
-  scaleFactor: number;
-}
-
 @Injectable()
 export class PdfRendererService implements OnDestroy {
   private readonly stateSubject = new BehaviorSubject<PdfPreviewState>(
@@ -42,7 +37,6 @@ export class PdfRendererService implements OnDestroy {
   readonly state$ = this.stateSubject.asObservable();
 
   private container: HTMLElement | null = null;
-  private pendingLoad: PendingPdfLoad | null = null;
   private pdfDoc: PDFDocumentProxy | null = null;
   private renderTasks: PDFRenderTask[] = [];
   private readonly loadGeneration = new AsyncGeneration();
@@ -52,7 +46,6 @@ export class PdfRendererService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.loadGeneration.invalidate();
-    this.pendingLoad = null;
     this.cancelRenderTasks();
     if (this.pdfDoc) {
       this.pdfDoc.destroy();
@@ -62,17 +55,11 @@ export class PdfRendererService implements OnDestroy {
 
   attachContainer(el: HTMLElement): void {
     this.container = el;
-    if (this.pendingLoad) {
-      const pendingLoad = this.pendingLoad;
-      this.pendingLoad = null;
-      void this.load(pendingLoad.src, pendingLoad.scaleFactor);
-    }
   }
 
   async load(src: FileSource, scaleFactor: number): Promise<void> {
     this.currentScaleFactor = scaleFactor;
     if (!this.container) {
-      this.pendingLoad = { src, scaleFactor };
       return;
     }
 
@@ -113,10 +100,6 @@ export class PdfRendererService implements OnDestroy {
 
   async rerender(scaleFactor: number): Promise<void> {
     this.currentScaleFactor = scaleFactor;
-    if (this.pendingLoad) {
-      this.pendingLoad = { ...this.pendingLoad, scaleFactor };
-      return;
-    }
     if (!this.pdfDoc) {
       return;
     }
@@ -125,7 +108,6 @@ export class PdfRendererService implements OnDestroy {
 
   reset(): void {
     this.loadGeneration.invalidate();
-    this.pendingLoad = null;
     this.cancelRenderTasks();
     clearChildren(this.container);
     if (this.pdfDoc) {

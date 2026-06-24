@@ -56,10 +56,13 @@ export class PdfPreviewComponent implements OnInit, OnChanges, OnDestroy {
       }),
     );
     this.renderer.attachContainer(this.pagesContainer.nativeElement);
+    if (this.src) {
+      this.renderer.load(this.src, this.renderScale);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.src) {
+    if (changes.src && !changes.src.firstChange) {
       if (this.src) {
         this.renderer.load(this.src, this.renderScale);
       } else {
