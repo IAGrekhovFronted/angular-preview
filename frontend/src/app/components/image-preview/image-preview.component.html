@@ -1,0 +1,13 @@
+<div class="image-preview">
+  <div class="image-preview__viewport">
+    <img
+      *ngIf="imageUrl"
+      class="image-preview__image"
+      [src]="imageUrl"
+      [style.width.px]="scaledWidth"
+      [style.height.px]="scaledHeight"
+      (load)="onImageLoad($event)"
+      alt=""
+    />
+  </div>
+</div>

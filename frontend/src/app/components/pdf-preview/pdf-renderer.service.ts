@@ -46,11 +46,7 @@ export class PdfRendererService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.loadGeneration.invalidate();
-    this.cancelRenderTasks();
-    if (this.pdfDoc) {
-      this.pdfDoc.destroy();
-      this.pdfDoc = null;
-    }
+    void this.clearCurrentPreview();
   }
 
   attachContainer(el: HTMLElement): void {
@@ -64,12 +60,7 @@ export class PdfRendererService implements OnDestroy {
     }
 
     const generation = this.loadGeneration.begin();
-    this.cancelRenderTasks();
-    clearChildren(this.container);
-    if (this.pdfDoc) {
-      await this.pdfDoc.destroy();
-      this.pdfDoc = null;
-    }
+    await this.clearCurrentPreview();
 
     this.patchState({ loading: true, error: null, totalPages: 0 });
 
@@ -108,12 +99,7 @@ export class PdfRendererService implements OnDestroy {
 
   reset(): void {
     this.loadGeneration.invalidate();
-    this.cancelRenderTasks();
-    clearChildren(this.container);
-    if (this.pdfDoc) {
-      this.pdfDoc.destroy();
-      this.pdfDoc = null;
-    }
+    void this.clearCurrentPreview();
     this.stateSubject.next(initialPdfPreviewState);
   }
 
@@ -196,6 +182,18 @@ export class PdfRendererService implements OnDestroy {
       }
     }
     this.renderTasks = [];
+  }
+
+  private async clearCurrentPreview(): Promise<void> {
+    this.cancelRenderTasks();
+    clearChildren(this.container);
+    if (!this.pdfDoc) {
+      return;
+    }
+
+    const pdfDoc = this.pdfDoc;
+    this.pdfDoc = null;
+    await pdfDoc.destroy();
   }
 
   private patchState(patch: Partial<PdfPreviewState>): void {

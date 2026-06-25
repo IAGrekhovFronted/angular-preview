@@ -9,6 +9,7 @@ import { PdfPreviewPage } from "./pages/pdf-preview/pdf-preview.page";
 import { ImportFileComponent } from "./components/import-file/import-file.component";
 import { DocxPreviewPage } from "./pages/docx-preview/docx-preview.page";
 import { DocxPreviewComponent } from "./components/docx-preview/docx-preview.component";
+import { ImagePreviewComponent } from "./components/image-preview/image-preview.component";
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { DocxPreviewComponent } from "./components/docx-preview/docx-preview.com
     PdfPreviewPage,
     PdfPreviewComponent,
     DocxPreviewComponent,
+    ImagePreviewComponent,
     ImportFileComponent,
   ],
   imports: [BrowserModule, CommonModule, AppRoutingModule],
