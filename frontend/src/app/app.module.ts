@@ -10,10 +10,12 @@ import { ImportFileComponent } from "./components/import-file/import-file.compon
 import { DocxPreviewPage } from "./pages/docx-preview/docx-preview.page";
 import { DocxPreviewComponent } from "./components/docx-preview/docx-preview.component";
 import { ImagePreviewComponent } from "./components/image-preview/image-preview.component";
+import { AsideModalComponent } from "./components/aside-modal/aside-modal.component";
 
 @NgModule({
   declarations: [
     AppComponent,
+    AsideModalComponent,
     DocxPreviewPage,
     PdfPreviewPage,
     PdfPreviewComponent,
@@ -23,6 +25,7 @@ import { ImagePreviewComponent } from "./components/image-preview/image-preview.
   ],
   imports: [BrowserModule, CommonModule, AppRoutingModule],
   providers: [],
+  entryComponents: [PdfPreviewComponent],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

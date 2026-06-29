@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
 } from "@angular/core";
 import { PdfSource } from "../../components/import-file/import-file.component";
+import { PdfPreviewAsideService } from "../../components/pdf-preview/pdf-preview-aside.service";
 
 @Component({
   selector: "pdf-preview-page",
@@ -15,10 +16,18 @@ export class PdfPreviewPage {
   pdfSource: PdfSource = null;
   urlInput = "";
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private pdfPreviewAside: PdfPreviewAsideService,
+  ) {}
 
   onSourceChange(source: PdfSource): void {
     this.pdfSource = source;
+    if (source) {
+      this.pdfPreviewAside.openFile(source);
+    } else {
+      this.pdfPreviewAside.close();
+    }
     this.cdr.markForCheck();
   }
 

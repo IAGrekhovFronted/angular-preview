@@ -7,11 +7,6 @@
   margin-top: 100px;
 }
 
-.pdf-preview-page-wrapper__preview {
-  overflow: auto;
-  max-height: 1000px;
-}
-
 .pdf-preview-page-wrapper__info {
   font-size: 20px;
 }
