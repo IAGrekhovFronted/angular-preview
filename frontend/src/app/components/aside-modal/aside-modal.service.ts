@@ -1,25 +1,15 @@
-import { Injectable, Type } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 
-export type AsideModalInputs<T> = Partial<T>;
-
-export interface AsideModalConfig<T> {
-  component: Type<T>;
-  inputs?: AsideModalInputs<T>;
-  title?: string;
-}
-
-export interface AsideModalState {
+export interface AsideModalState<T = unknown> {
   opened: boolean;
-  component: Type<unknown> | null;
-  inputs: Record<string, unknown>;
+  data: T | null;
   title: string | null;
 }
 
 export const initialAsideModalState: AsideModalState = {
   opened: false,
-  component: null,
-  inputs: {},
+  data: null,
   title: null,
 };
 
@@ -31,12 +21,11 @@ export class AsideModalService {
 
   readonly state$ = this.stateSubject.asObservable();
 
-  open<T>(config: AsideModalConfig<T>): void {
+  open<T>(data: T, title: string | null = null): void {
     this.stateSubject.next({
       opened: true,
-      component: config.component,
-      inputs: (config.inputs || {}) as Record<string, unknown>,
-      title: config.title || null,
+      data,
+      title,
     });
   }
 
@@ -47,8 +36,7 @@ export class AsideModalService {
 
   clear(): void {
     this.patchState({
-      component: null,
-      inputs: {},
+      data: null,
       title: null,
     });
   }

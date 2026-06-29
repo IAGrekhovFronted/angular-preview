@@ -25,7 +25,6 @@ import { AsideModalComponent } from "./components/aside-modal/aside-modal.compon
   ],
   imports: [BrowserModule, CommonModule, AppRoutingModule],
   providers: [],
-  entryComponents: [PdfPreviewComponent],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

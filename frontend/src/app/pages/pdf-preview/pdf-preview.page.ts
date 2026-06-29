@@ -4,7 +4,7 @@ import {
   ChangeDetectorRef,
 } from "@angular/core";
 import { PdfSource } from "../../components/import-file/import-file.component";
-import { PdfPreviewAsideService } from "../../components/pdf-preview/pdf-preview-aside.service";
+import { AsideModalService } from "../../components/aside-modal/aside-modal.service";
 
 @Component({
   selector: "pdf-preview-page",
@@ -13,20 +13,18 @@ import { PdfPreviewAsideService } from "../../components/pdf-preview/pdf-preview
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PdfPreviewPage {
-  pdfSource: PdfSource = null;
   urlInput = "";
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private pdfPreviewAside: PdfPreviewAsideService,
+    private asideModal: AsideModalService,
   ) {}
 
   onSourceChange(source: PdfSource): void {
-    this.pdfSource = source;
     if (source) {
-      this.pdfPreviewAside.openFile(source);
+      this.asideModal.open<PdfSource>(source, "PDF Preview");
     } else {
-      this.pdfPreviewAside.close();
+      this.asideModal.close();
     }
     this.cdr.markForCheck();
   }

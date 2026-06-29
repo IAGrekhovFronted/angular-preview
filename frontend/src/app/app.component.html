@@ -11,6 +11,17 @@
       <router-outlet></router-outlet>
     </div>
 
-    <app-aside-modal></app-aside-modal>
+    <app-aside-modal
+      *ngIf="asideModal.state$ | async as asideState"
+      [opened]="asideState.opened"
+      [title]="asideState.title"
+      (close)="asideModal.close()"
+    >
+      <app-pdf-preview
+        *ngIf="asideState.data"
+        [src]="asideState.data"
+        [scale]="100"
+      ></app-pdf-preview>
+    </app-aside-modal>
   </div>
 </div>

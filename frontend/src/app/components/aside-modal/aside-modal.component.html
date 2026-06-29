@@ -1,19 +1,19 @@
-<div class="aside-modal" [class.aside-modal--open]="state.opened">
-  <aside class="aside-modal__panel" [attr.aria-hidden]="!state.opened">
+<div class="aside-modal" [class.aside-modal--open]="opened">
+  <aside class="aside-modal__panel" [attr.aria-hidden]="!opened">
     <header class="aside-modal__header">
-      <h2 class="aside-modal__title" *ngIf="state.title">{{ state.title }}</h2>
+      <h2 class="aside-modal__title" *ngIf="title">{{ title }}</h2>
       <button
         type="button"
         class="aside-modal__close"
         aria-label="Close"
-        (click)="close()"
+        (click)="onClose()"
       >
         x
       </button>
     </header>
 
     <div class="aside-modal__content">
-      <ng-template #contentHost></ng-template>
+      <ng-content></ng-content>
     </div>
   </aside>
 </div>
