@@ -15,7 +15,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImagePreviewComponent implements OnChanges, OnDestroy {
-  @Input() file: ArrayBuffer | null = null;
+  @Input() file: Blob | null = null;
   @Input() scale = 100;
 
   imageUrl: string | null = null;
@@ -57,7 +57,7 @@ export class ImagePreviewComponent implements OnChanges, OnDestroy {
     return Math.max(0.01, this.scale / 100);
   }
 
-  private setImageUrl(file: ArrayBuffer | null): void {
+  private setImageUrl(file: Blob | null): void {
     this.revokeImageUrl();
     this.naturalWidth = 0;
     this.naturalHeight = 0;
@@ -67,9 +67,7 @@ export class ImagePreviewComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    this.imageUrl = URL.createObjectURL(
-      new Blob([file], { type: this.detectImageMimeType(file) }),
-    );
+    this.imageUrl = URL.createObjectURL(file);
   }
 
   private revokeImageUrl(): void {
@@ -79,27 +77,5 @@ export class ImagePreviewComponent implements OnChanges, OnDestroy {
 
     URL.revokeObjectURL(this.imageUrl);
     this.imageUrl = null;
-  }
-
-  private detectImageMimeType(file: ArrayBuffer): string {
-    const bytes = new Uint8Array(file);
-    if (
-      bytes.length >= 4 &&
-      bytes[0] === 0x89 &&
-      bytes[1] === 0x50 &&
-      bytes[2] === 0x4e &&
-      bytes[3] === 0x47
-    ) {
-      return "image/png";
-    }
-    if (
-      bytes.length >= 3 &&
-      bytes[0] === 0xff &&
-      bytes[1] === 0xd8 &&
-      bytes[2] === 0xff
-    ) {
-      return "image/jpeg";
-    }
-    return "";
   }
 }
